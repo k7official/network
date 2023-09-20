@@ -11,17 +11,23 @@ from django.core.paginator import Paginator
 from .models import User, Post
 
 
+def paginate(request, posts):
+    # paginate posts
+    paginator = Paginator(posts, 10)  # Show 10 contacts per page.
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return page_obj
+
 def index(request):
     if request.user.is_authenticated:
         # Retrieve all posts from the database and order them by creation date in descending order
         posts = Post.objects.all().order_by('-created_at')
-        paginator = Paginator(posts, 10)  # Show 10 contacts per page.
-
-        page_number = request.GET.get("page")
-        page_obj = paginator.get_page(page_number)
+        page_obj = paginate(request, posts)
         return render(request, "network/index.html", {"page_obj": page_obj})
     else:
         return HttpResponseRedirect(reverse("login"))
+
+
 
 
 @login_required
@@ -33,7 +39,10 @@ def following(request):
         all_posts.extend(posts)
     # Sort `all_posts` by the 'created_at' field in descending order (latest first)
     all_posts = sorted(all_posts, key=lambda post: post.created_at, reverse=True)
-    return render(request, "network/index.html", {'posts': all_posts})
+    # paginate posts
+    page_obj = paginate(request, all_posts)
+
+    return render(request, "network/index.html", {'page_obj': page_obj})
 
 
 def login_view(request):
@@ -113,13 +122,13 @@ def profile(request, username):
     followers = profile_user.followers.all() 
     following = profile_user.following.all()
     posts_for_specific_user = Post.objects.filter(user__username=username).order_by('-created_at')
-    print(posts_for_specific_user)
+    page_obj = paginate(request, posts_for_specific_user)
     return render(request, "network/profile.html",{
         'profile_user': profile_user,
         'current_user': current_user, 
         'followers': followers, 
         'following': following, 
-        'posts': posts_for_specific_user})
+        'page_obj': page_obj})
 
 @csrf_exempt
 @login_required
