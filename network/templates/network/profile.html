@@ -1,0 +1,32 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}
+
+    <div>
+        <h3>{{ profile_user.username }}</h3>
+        {% if user != profile_user %}
+            {% if user not in profile_user.followers.all %}
+                <button id="follow-button" style="display: block;">Follow</button>
+                <button id="unfollow-button" style="display: none;">Unfollow</button>
+            {% else %}
+                <button id="follow-button" style="display: none;">Follow</button>
+                <button id="unfollow-button" style="display: block;">Unfollow</button>
+            {% endif %}
+            {% block follow_button_js %}
+                <script src="{% static 'network/follow.js' %}"></script>
+            {% endblock %}
+        {% endif %}
+
+        <div id="profile-user" data-username="{{ profile_user.username }}"></div>
+
+        <div class="follower-following">
+            <strong>{{ following|length }}</strong> Following
+            <strong class="indented">{{ followers|length }}</strong> Followers
+        </div>
+    </div>
+    <div>
+       {% include 'network/post_list.html' with posts=posts %}
+    </div>
+
+{% endblock %}

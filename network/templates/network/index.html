@@ -1,0 +1,25 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}
+    <h1>All Posts</h1>
+    <div id="post-view">
+        <ul class="list-group">
+        
+            <li class="list-group-item">
+                <h4>New Post</h4>
+                <form id="post-form" method="post" action="{% url 'create_post' %}">
+                    <textarea class="form-control" id="post-content" placeholder="What is happening?!"></textarea>
+                    <input id="post-button" type="submit" class="btn btn-primary" value="Post"/>
+                </form>
+            </li>
+        </ul>
+    
+        {% include 'network/post_list.html' with page_obj=page_obj %}
+    </div>
+
+{% endblock %}
+
+{% block script %}
+    <script src="{% static 'network/post.js' %}"></script>
+{% endblock %}

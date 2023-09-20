@@ -1,0 +1,32 @@
+<ul class="list-group">
+    {% for post in page_obj %}
+        <div class="post">
+            <li class="list-group-item">
+                <strong><a href="{% url 'profile' username=post.user.username %}">{{ post.user.username }}</a></strong> <br>
+                {{ post.content }}<br>
+                <p class="date">{{ post.created_at }}</p>
+                <div class="like-count">
+                    <span class="like-icon">♥</span> {{ post.likes }}
+                </div>
+            </li>
+        </div>
+    {% endfor %}
+</ul>
+
+<div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="{% url 'index' %}?page=1">&laquo; first</a>
+            <a href="{% url 'index' %}?page={{ page_obj.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="{% url 'index' %}?page={{ page_obj.next_page_number }}">next</a>
+            <a href="{% url 'index' %}?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </span>
+</div>
