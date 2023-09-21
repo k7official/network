@@ -5,7 +5,6 @@
     <h1>All Posts</h1>
     <div id="post-view">
         <ul class="list-group">
-        
             <li class="list-group-item">
                 <h4>New Post</h4>
                 <form id="post-form" method="post" action="{% url 'create_post' %}">
@@ -14,9 +13,9 @@
                 </form>
             </li>
         </ul>
-    
-        {% include 'network/post_list.html' with page_obj=page_obj %}
     </div>
+    
+    {% include 'network/post_list.html' with page_obj=page_obj %}
 
 {% endblock %}
 

@@ -1,9 +1,81 @@
+{% load static %}
+{% block edit_post %}
+    <script src="{% static 'network/edit_post.js' %}"></script>
+{% endblock %}
+<script>
+    function submitHandler(id){
+        const textareaValue = document.getElementById(`textarea_${id}`).value;
+        const content = document.getElementById(`content_${id}`);
+        const modal = document.getElementById(`modal_edit_post_${id}`);
+
+        fetch(`/update_post/${id}`, {
+            method: "POST",
+            body: JSON.stringify({
+                content: textareaValue
+            })
+        }).then(response => {
+                if (response.ok) {
+                    // The post was successfully created, you can update the UI as needed
+                    textareaValue.value = ''; // Clear the input field
+                    return response.json();
+                } else {
+                    throw new Error('Failed to update the post');
+                }
+            })
+            .then(result => {
+                content.innerHTML = result.data;
+
+                modal.classList.remove('show');
+                modal.setAttribute('aria-hidden', 'true');
+                modal.setAttribute('style', 'display: None');
+
+                // get modal backdrops
+                const modalBackdrops = document.getElementsByClassName('modal-backdrop');
+
+                for(let i=0; i<modalBackdrops.length; i++){ 
+                    document.body.removeChild(modalBackdrops[i]);
+                }
+                $('body').removeClass('modal-open');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+</script>
+
 <ul class="list-group">
     {% for post in page_obj %}
-        <div class="post">
+        <div id="post" data-post-id="{{ post.id }}">
             <li class="list-group-item">
                 <strong><a href="{% url 'profile' username=post.user.username %}">{{ post.user.username }}</a></strong> <br>
-                {{ post.content }}<br>
+                {% if user.is_authenticated %}
+                    {% if user == post.user %}
+                        <button class="btn btn-sm btn-outline-primary edit-button" data-toggle="modal" data-target="#modal_edit_post_{{ post.id }}">Edit</button><br>
+                        <div class="modal fade" id="modal_edit_post_{{ post.id }}" tabindex="-1" role="dialog" aria-labelledby="modal_edit_post_{{ post.id }}_label" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Edit Post</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <textarea class="form-control" name="content" id="textarea_{{ post.id }}" rows="5">{{ post.content }}</textarea>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" onclick="submitHandler({{ post.id }})">Save changes</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif%}
+                {% endif%}
+
+                <div class="post-content" id="content_{{ post.id }}">
+                    {{ post.content }}
+                </div>
                 <p class="date">{{ post.created_at }}</p>
                 <div class="like-count">
                     <span class="like-icon">♥</span> {{ post.likes }}
@@ -11,22 +83,28 @@
             </li>
         </div>
     {% endfor %}
+
 </ul>
 
-<div class="pagination">
-    <span class="step-links">
-        {% if page_obj.has_previous %}
-            <a href="{% url 'index' %}?page=1">&laquo; first</a>
-            <a href="{% url 'index' %}?page={{ page_obj.previous_page_number }}">previous</a>
-        {% endif %}
+<span class="step-links">
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+            
+                <li class="page-item"><a class="page-link"  href="{% url 'index' %}?page=1">&laquo; first</a></li>
+                <li class="page-item"><a class="page-link"  href="{% url 'index' %}?page={{ page_obj.previous_page_number }}">previous</a></li>
+            {% endif %}
 
-        <span class="current">
-            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-        </span>
-
-        {% if page_obj.has_next %}
-            <a href="{% url 'index' %}?page={{ page_obj.next_page_number }}">next</a>
-            <a href="{% url 'index' %}?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
-        {% endif %}
-    </span>
-</div>
+                {% for page_num in page_obj.paginator.page_range %}
+                    <li class="page-item {% if page_num == page_obj.number %}active{% endif %}">
+                        <a class="page-link" href="{% url 'index' %}?page={{ page_num }}">{{ page_num }}</a>
+                    </li>
+                {% endfor %}
+                
+            {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="{% url 'index' %}?page={{ page_obj.next_page_number }}">next</a></li>
+                <li class="page-item"><a class="page-link" href="{% url 'index' %}?page={{ page_obj.paginator.num_pages }}">last &raquo;</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</span>

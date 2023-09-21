@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     const postForm = document.getElementById('post-form');
     const postContent = document.getElementById('post-content');
+    const editButton = document.getElementById('edit-button');
 
     postForm.addEventListener('submit', function (event) {
         event.preventDefault(); // Prevent the default form submission
@@ -36,5 +37,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Error:', error);
             });
     });
+
 });
 

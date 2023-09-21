@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+import json
 
 from .models import User, Post
 
@@ -160,4 +161,15 @@ def unfollow(request, username):
     json_response = JsonResponse(data)
     return json_response
 
+@csrf_exempt
+def update_post(request, post_id):
+    # Retrieve the Post object to update or return a 404 response if not found
+    post = get_object_or_404(Post, id=post_id)
+
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        post.content = data["content"]
+        post.save()
+        return JsonResponse({'message': 'Post updated successfully', 'data': data["content"]})
+    
 
