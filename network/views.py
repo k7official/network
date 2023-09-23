@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 import json
 
-from .models import User, Post
+from .models import User, Post, Like
 
 
 def paginate(request, posts):
@@ -19,12 +19,38 @@ def paginate(request, posts):
     page_obj = paginator.get_page(page_number)
     return page_obj
 
+def remove_like(request, post_id):
+    post = Post.objects.get(pk=post_id)
+    user = User.objects.get(pk=request.user.id)
+    like = Like.objects.filter(user=user, post=post)
+    like.delete()
+    return JsonResponse({'message': 'Post unliked successfully'})
+
+def add_like(request, post_id):
+    post = Post.objects.get(pk=post_id)
+    user = User.objects.get(pk=request.user.id)
+    newLike = Like(user=user, post=post)
+    newLike.save()
+    return JsonResponse({'message': 'Post liked successfully'})
+
 def index(request):
     if request.user.is_authenticated:
         # Retrieve all posts from the database and order them by creation date in descending order
         posts = Post.objects.all().order_by('-created_at')
         page_obj = paginate(request, posts)
-        return render(request, "network/index.html", {"page_obj": page_obj})
+        
+        allLikes = Like.objects.all()
+        whoYouLiked = []
+        try:
+            for like in allLikes:
+                if like.user.id == request.user.id:
+                    whoYouLiked.append(like.post.id)
+        except:
+            whoYouLiked = []
+        return render(request, "network/index.html", {
+            "page_obj": page_obj,
+            "whoYouLiked": whoYouLiked
+        })
     else:
         return HttpResponseRedirect(reverse("login"))
 

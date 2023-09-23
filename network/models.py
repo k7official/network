@@ -9,8 +9,13 @@ class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    # updated_at = models.DateTimeField(auto_now=True)
-    likes = models.IntegerField(default=0)
 
     def __str__(self):
         return f"Post by {self.user.username} at {self.created_at}"
+    
+class Like(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user_like")
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="post_like")
+
+    def __str__(self) -> str:
+        return f"{self.user} liked {self.post}"
