@@ -42,33 +42,27 @@
 
     function likeHandler(id, whoYouLiked){
         // prevent refreshing
+        console.log(`Clicked on post with ID: ${id}`);
+        console.log(`Current whoYouLiked array: ${whoYouLiked}`);
         const icon = document.getElementById(`${id}`);
-        icon.classList.remove('fa-solid')
-        icon.classList.remove('fa-regular')
-        if(whoYouLiked.indexOf(id)>=0){
-            var liked = true;
-        }
-        else{
-            var liked = false;
-        }
+        icon.classList.toggle('fa-solid', !whoYouLiked.includes(id));
+        icon.classList.toggle('fa-regular', whoYouLiked.includes(id));
+        
 
-        if(liked === true){
+        if(whoYouLiked.includes(id)){
             fetch(`/remove_like/${id}`)
             .then(response => response.json())
             .then(result => {
                 //console.log(result)
-                icon.classList.add('fa-regular')
-            })
+            });
         }else{
             fetch(`/add_like/${id}`)
             .then(response => response.json())
             .then(result => {
                 //console.log(result)
-                icon.classList.add('fa-solid')
-            })
+            });
         }
-        liked = !liked
-;    }
+    }
 </script>
 
 <ul class="list-group">
@@ -101,9 +95,9 @@
                     {% else %}
                         {% if post.id in whoYouLiked%}
                         <!-- This means we already liked the post-->
-                        <i class="fa-solid fa-thumbs-up" id="{{ post.id }}" onclick="likeHandler({{ post.id }}, {{ whoYouLiked }})"></i>
+                        <i class="fa-solid fa-thumbs-up" id="{{ post.id }}" onclick="likeHandler({{ post.id }}, '{{ whoYouLiked }}')"></i>
                         {% else%}
-                        <i class="fa-regular fa-thumbs-up" id="{{ post.id }}" onclick="likeHandler({{ post.id }}, {{ whoYouLiked }})"></i>
+                        <i class="fa-regular fa-thumbs-up" id="{{ post.id }}" onclick="likeHandler({{ post.id }}, '{{ whoYouLiked }}')"></i>
                         {% endif %}
                     {% endif%}
                 {% endif%}
